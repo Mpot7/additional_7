@@ -1,6 +1,11 @@
 const n=9;
+const ni=3;
+var roots=[];
+var c=0, il=0, jl=0, solved, r=[];
+
 module.exports = function solveSudoku(matrix) {
-  var matrix = [
+ 
+/* { var matrix = [
       [6, 5, 0, 7, 3, 0, 0, 8, 0],
       [0, 0, 0, 4, 8, 0, 5, 3, 0],
       [8, 4, 0, 9, 2, 5, 0, 0, 0],
@@ -10,25 +15,207 @@ module.exports = function solveSudoku(matrix) {
       [0, 0, 9, 0, 0, 0, 0, 0, 6],
       [0, 0, 7, 0, 0, 0, 0, 5, 0],
       [1, 6, 5, 3, 9, 0, 4, 7, 0]
-    ];
-      var res=matrix, vars1=[], vars2=[], vars3=[];
-      const numbers=[1, 2, 3, 4, 5, 6, 7, 8, 9];
-      for (let repeat=0; repeat<n*n*n; repeat++) {
-      for (let i=0; i<n; i++) {
-        for (let j=0; j<n; j++) {
-          if (res[i][j]==0){
-            vars1=diff(numbers, res[i]);
-            vars2=diff(vars1, getcolumn(res,j));
-            vars3=diff(vars2, getsquare(res,i,j));
-            if (vars3.length==1) {
-              res[i][j]=vars3[0];
-            }
+    ];/*
+  res=matrix; 
+  var pos=0;
+  var tmpres=[], rootsc=[];
+  res=solve(matrix);
+  if (!solved) {
+    ic=il;
+    jc=jl;
+    rootsc=roots;
+    do {
+      console.log("pos=");
+      console.log(pos);
+      console.log(rootsc);
+      console.log("il,jl=");
+      console.log(il,jl);
+      tmpres=res;
+      tmpres[ic][jc]=rootsc[pos];
+      pos++;
+      tmpres=solve(tmpres);
+    } while ((!solved)&(pos<9));
+  }
+  return tmpres;
+  //console.log(tmpres);
+  */
+
+  var res=matrix;
+  var hidden=[];
+  for (let i=0; i<n; i++) {
+    roots[i]= new Array;
+    for (let j=0; j<n; j++) {
+      roots[i][j]= new Array;
+    }
+  }
+  res=solve(res);
+  console.log (res);
+  var pi=0;
+  while ((!solved)&(pi<n)) {
+   // console.log("i am here2 pi=",pi);
+    hidden=unique(getrootsrow(pi));
+    if (hidden.length==1){
+        for (j=0; j<n; j++) {
+          for (z=0; z<n; z++) {
+            if (roots[pi][j][z]==hidden[0])
+              res[pi][j]=hidden[0];
           }
         }
       }
+    res=solve(res);
+    pi++;
+  //  console.log("pi=",pi);
+  }
+  console.log (res);
+  pi=0;
+  while ((!solved)&(pi<n)) {
+    console.log("i am here3");
+    hidden=unique(getrootscol(pi));
+    console.log(hidden);
+    console.log(getrootscol(pi));
+    if (hidden.length==1){
+        for (j=0; j<n; j++) {
+          for (z=0; z<n; z++) {
+            if (roots[j][pi][z]==hidden[0])
+              res[j][pi]=hidden[0];
+          }
+        }
       }
- // console.log(res);
-  return res;
+    res=solve(res);
+    pi++;
+  }
+
+  pi=1;
+  var pj;
+  while ((!solved)&(pi<ni+1)) {
+    for (pj=1; pj<ni+1; pj++) {
+      hidden=unique(getrootsquare(pi, pj));
+      console.log("sqh", pi,pj,hidden);
+      console.log("sq", pi,pj,getrootsquare(pi, pj));
+      if (hidden.length==1){
+          for (i=ni*pi-ni; i<(ni*pi); i++) {
+            for (j=ni*pj-ni; j<(ni*pj); j++) {
+              for (let c=0; c<n; c++) {
+                if (roots[pi][pj][c]==hidden[0])
+                  res[pi][pj]=hidden[0];
+              }
+            }
+          }
+      }
+    }
+    res=solve(res);
+    pi++;
+  }
+
+return res;
+//console.log(res);
+}
+
+
+    function solve(matrix) {
+      var vars1=[], vars2=[], vars3=[];
+      const numbers=[1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var changed;
+      res=matrix;
+      solved=1;
+      changed=1;
+  //    console.log("i am here1");
+      while (changed==1) {
+   //     console.log("changed1=");
+   //     console.log(changed);
+        changed=0;
+    //    console.log("i am here");
+        for (let i=0; i<n; i++) {
+          for (let j=0; j<n; j++) {
+            if (res[i][j]==0){
+              vars1=diff(numbers, res[i]);
+              vars2=diff(vars1, getcolumn(res,j));
+              vars3=diff(vars2, getsquare(res,i,j));
+              if (vars3.length==1) {
+                res[i][j]=vars3[0];
+                changed=1;
+              }
+              else {
+                roots[i][j]=vars3;
+     //           console.log(roots[i][j]);
+               /*  for (k=0; k<vars3.length; k++) {
+                  roots[i][j][k]=vars3[k];
+                 }*/
+                solved=0;
+                il=i;
+                jl=j;
+              }
+            }
+          }
+        }
+  //      console.log("changed=");
+  //      console.log(changed);
+      } 
+      return res;
+    }
+
+function getrootsrow (row) {
+ /* var copyarr=[];
+  for (let i=0; i<n; i++) {
+    copyarr[i]= new Array;
+    for (let j=0; j<n; j++) {
+      copyarr[i][j]= new Array;
+    }
+  }
+*/
+  //copyarr=arr;
+  let rootsrow=[];
+  for (let j=0; j<n; j++) {
+  //  console.log("roots[",row,j,"]=",roots[row] );
+    if (roots[row][j].length!=0) {
+     // if (roots[row][j]!=[]) {
+ //     for (i=0; i<arr[row][j].length; i++) {
+        let i=0;
+        while (roots[row][j][i]) {
+        rootsrow.push(roots[row][j][i]);
+        i++;
+         }
+       }
+  }
+  return rootsrow;
+}  
+
+function getrootscol (col) {
+  let rootscol=[];
+  for (let j=0; j<n; j++) {
+    if (roots[j][col].length!=0) {
+      for (let i=0; i<roots[j][col].length; i++) {
+        rootscol.push(roots[j][col][i]);
+      }
+    }
+  }
+  return rootscol;
+}  
+
+function getrootsquare(si,sj) {
+  let rootsquare=[];
+  for (let i=ni*si-ni; i<(ni*si); i++) {
+    for (let j=ni*sj-ni; j<(ni*sj); j++) {
+      for (let z=0; z<roots[i][j].length; z++) {
+        rootsquare.push(roots[i][j][z]);
+      }  
+    }
+  }
+  return rootsquare;
+} 
+
+function unique(arr) {
+  let arruniq=[];
+  for (let i=0; i<arr.length-1; i++) {
+    let uniq=1;
+    for (let j=i+1; j<arr.length; j++) {
+      if (arr[i]==arr[j]) 
+        uniq=0;
+    }
+    if (uniq==1) 
+      arruniq.push(arr[i]);
+  }
+  return arruniq;
 }
 
 function diff(arr1, arr2) {
