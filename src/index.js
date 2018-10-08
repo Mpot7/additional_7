@@ -15,39 +15,10 @@ module.exports = function solveSudoku(matrix) {
       [0, 0, 9, 0, 0, 0, 0, 0, 6],
       [0, 0, 7, 0, 0, 0, 0, 5, 0],
       [1, 6, 5, 3, 9, 0, 4, 7, 0]
-    ];/*
-  res=matrix; 
-  var pos=0;
-  var tmpres=[], rootsc=[];
-  res=solve(matrix);
-  if (!solved) {
-    ic=il;
-    jc=jl;
-    rootsc=roots;
-    do {
-      console.log("pos=");
-      console.log(pos);
-      console.log(rootsc);
-      console.log("il,jl=");
-      console.log(il,jl);
-      tmpres=res;
-      tmpres[ic][jc]=rootsc[pos];
-      pos++;
-      tmpres=solve(tmpres);
-    } while ((!solved)&(pos<9));
-  }
-  return tmpres;
-  //console.log(tmpres);
-  */
-
+    ];
+*/
   var res=matrix;
   var hidden=[];
-  for (let i=0; i<n; i++) {
-    roots[i]= new Array;
-    for (let j=0; j<n; j++) {
-      roots[i][j]= new Array;
-    }
-  }
   res=solve(res);
   console.log (res);
   var pi=0;
@@ -57,22 +28,35 @@ module.exports = function solveSudoku(matrix) {
     if (hidden.length==1){
         for (j=0; j<n; j++) {
           for (z=0; z<n; z++) {
-            if (roots[pi][j][z]==hidden[0])
+            if (roots[pi][j][z]==hidden[0]) {
+             // console.log("yaystr!",pi," ",j);
+             // console.log("hidden",hidden);
+             // console.log("getrootsrow",getrootsrow(pi),"1root=",roots[pi][j]);
               res[pi][j]=hidden[0];
+
+            }
           }
         }
       }
+///////*
+ 
+///////
     res=solve(res);
     pi++;
   //  console.log("pi=",pi);
   }
+ /* console.log ("po strokam");
   console.log (res);
+
+  console.log("roots of 0 stolb");
+  console.log(getrootscol(0));
+  console.log(unique(getrootscol(0)));*/
   pi=0;
   while ((!solved)&(pi<n)) {
-    console.log("i am here3");
+  //  console.log("i am here3");
     hidden=unique(getrootscol(pi));
     console.log(hidden);
-    console.log(getrootscol(pi));
+    console.log(getrootscol(pi),"col=",pi);
     if (hidden.length==1){
         for (j=0; j<n; j++) {
           for (z=0; z<n; z++) {
@@ -84,14 +68,15 @@ module.exports = function solveSudoku(matrix) {
     res=solve(res);
     pi++;
   }
-
+  console.log ("po stolb");
+  console.log (res);
   pi=1;
   var pj;
   while ((!solved)&(pi<ni+1)) {
     for (pj=1; pj<ni+1; pj++) {
       hidden=unique(getrootsquare(pi, pj));
-      console.log("sqh", pi,pj,hidden);
-      console.log("sq", pi,pj,getrootsquare(pi, pj));
+ //     console.log("sqh", pi,pj,hidden);
+  //    console.log("sq", pi,pj,getrootsquare(pi, pj));
       if (hidden.length==1){
           for (i=ni*pi-ni; i<(ni*pi); i++) {
             for (j=ni*pj-ni; j<(ni*pj); j++) {
@@ -107,8 +92,11 @@ module.exports = function solveSudoku(matrix) {
     pi++;
   }
 
+  console.log ("po kv");
+console.log (res);
 return res;
-//console.log(res);
+
+
 }
 
 
@@ -119,6 +107,12 @@ return res;
       res=matrix;
       solved=1;
       changed=1;
+      for (let i=0; i<n; i++) {
+        roots[i]= new Array;
+        for (let j=0; j<n; j++) {
+          roots[i][j]= new Array;
+        }
+      }
   //    console.log("i am here1");
       while (changed==1) {
    //     console.log("changed1=");
@@ -127,23 +121,23 @@ return res;
     //    console.log("i am here");
         for (let i=0; i<n; i++) {
           for (let j=0; j<n; j++) {
+          // console.log ("res[",i,j,"]",res[i][j]);
             if (res[i][j]==0){
               vars1=diff(numbers, res[i]);
               vars2=diff(vars1, getcolumn(res,j));
               vars3=diff(vars2, getsquare(res,i,j));
+             // console.log("var",i,j,vars3);
               if (vars3.length==1) {
                 res[i][j]=vars3[0];
                 changed=1;
               }
               else {
                 roots[i][j]=vars3;
-     //           console.log(roots[i][j]);
+             //   console.log("rrr",i,j,roots[i][j]);
                /*  for (k=0; k<vars3.length; k++) {
                   roots[i][j][k]=vars3[k];
                  }*/
                 solved=0;
-                il=i;
-                jl=j;
               }
             }
           }
@@ -151,6 +145,9 @@ return res;
   //      console.log("changed=");
   //      console.log(changed);
       } 
+   //   for (let j=0; j<n; j++){
+   //   console.log ("roots[0][",j,"]=", roots[0][j]); 
+   //   }
       return res;
     }
 
@@ -184,11 +181,20 @@ function getrootscol (col) {
   let rootscol=[];
   for (let j=0; j<n; j++) {
     if (roots[j][col].length!=0) {
-      for (let i=0; i<roots[j][col].length; i++) {
+
+      let i=0;
+        while (roots[j][col][i]) {
+        rootscol.push(roots[j][col][i]);
+        i++;
+         }
+       }
+  }
+
+/*      for (let i=0; i<roots[j][col].length; i++) {
         rootscol.push(roots[j][col][i]);
       }
     }
-  }
+  } */
   return rootscol;
 }  
 
@@ -208,8 +214,8 @@ function unique(arr) {
   let arruniq=[];
   for (let i=0; i<arr.length-1; i++) {
     let uniq=1;
-    for (let j=i+1; j<arr.length; j++) {
-      if (arr[i]==arr[j]) 
+    for (let j=0; j<arr.length; j++) {
+      if ((arr[i]==arr[j]) &(i!=j))
         uniq=0;
     }
     if (uniq==1) 
